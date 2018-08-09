@@ -3,6 +3,7 @@ const router = new Router();
 
 const skillsCtrl = require('../controllers/skills');
 const productsCtrl = require('../controllers/products');
+const authCtrl = require('../controllers/auth.js');
 require('../errorHandler');
 
 // index
@@ -25,15 +26,20 @@ router.get('/', async(ctx) => {
 
 // admin
 router.get('/admin', async(ctx) => {
-    console.log('ctx.flash.get()', ctx.flash.get());
+    console.log('ctx.session', ctx.session);
+    if (ctx.session.isAuth === true) {
+        const msgskill = ctx.flash.get() ? ctx.flash.get().msgskill : null;
+        const msgfile = ctx.flash.get() ? ctx.flash.get().msgfile : null;
 
-    const msgskill = ctx.flash.get() ? ctx.flash.get().msgskill : null;
-    const msgfile = ctx.flash.get() ? ctx.flash.get().msgfile : null;
+        ctx.render('admin', {
+            msgskill,
+            msgfile
+        });
+    }
+    else {
+        ctx.redirect('/');
+    }
 
-    ctx.render('admin', {
-        msgskill,
-        msgfile
-    });
 });
 
 router.post('/admin/skills', async(ctx) => {
@@ -67,7 +73,32 @@ router.post('/admin/upload', async(ctx) => {
 
 // login
 router.get('/login', async(ctx) => {
-    ctx.render('login');
+    const msgslogin = ctx.flash.get() ? ctx.flash.get().msgslogin : null;
+
+    ctx.render('login', {
+        msgslogin
+    });
+});
+
+router.post('/login', async(ctx) => {
+    try {
+        const authResult = await authCtrl.auth(ctx.request.body);
+        if (authResult) {
+            ctx.session.isAuth = true;
+            ctx.redirect('/admin');
+        }
+        else {
+            ctx.flash({msgslogin: 'Unautorized'});
+            ctx.redirect('/login');
+        }
+    }
+    catch (err) {
+        console.error("err", err);
+        err && err.message && ctx.flash.set({msgslogin: err.message});
+        ctx.redirect('/login');
+    }
+
+
 });
 
 
