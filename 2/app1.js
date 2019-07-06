@@ -1,6 +1,10 @@
 const http = require('http');
 
+let conter = 0;
+
 const server = http.createServer((req, res) => {
+    conter++;
+
     if (req.method === 'GET') {
         if (req.url === '/') {
 
@@ -36,6 +40,6 @@ const server = http.createServer((req, res) => {
 
 });
 
-server.listen(3000, () => {
+server.listen(3001, () => {
     console.log('Server started on port 3000');
 });

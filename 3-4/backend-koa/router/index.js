@@ -97,8 +97,6 @@ router.post('/login', async(ctx) => {
         err && err.message && ctx.flash.set({msgslogin: err.message});
         ctx.redirect('/login');
     }
-
-
 });
 
 
